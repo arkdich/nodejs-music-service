@@ -8,6 +8,8 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
+    "image:db": "docker build -t music-service-img -f dockerfile.db .",
+    "start:db": "docker run --rm --name music-service-cont -p 8000:5432 music-service-db",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

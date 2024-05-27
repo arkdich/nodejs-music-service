@@ -1,0 +1,10 @@
+FROM postgres:alpine
+WORKDIR /db
+
+COPY ./src/database /docker-entrypoint-initdb.d
+
+ENV PORT=5432
+ENV POSTGRES_USER=myuser
+ENV POSTGRES_PASSWORD=mypassword
+
+EXPOSE $PORT
