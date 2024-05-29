@@ -5,6 +5,9 @@ export class FavoriteEntity {
   @PrimaryColumn({ name: 'id', type: 'uuid' })
   public id: string;
 
+  @Column({ name: 'user_id', type: 'uuid' })
+  public userId: string;
+
   @Column({ name: 'artists', type: 'uuid', array: true })
   public artists: string[];
 

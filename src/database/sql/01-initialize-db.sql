@@ -13,7 +13,7 @@ CREATE TABLE public.users (
 
 CREATE TABLE public.artist (
     id uuid PRIMARY KEY NOT NULL UNIQUE DEFAULT gen_random_uuid(), 
-    name character varying(100) NOT NULL,
+    name character varying(100) NOT NULL UNIQUE,
     grammy boolean NOT NULL DEFAULT false,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now()
@@ -39,7 +39,8 @@ CREATE TABLE public.track (
 );
 
 CREATE TABLE public.favorite (
-    id uuid PRIMARY KEY NOT NULL UNIQUE DEFAULT gen_random_uuid(), 
+    id uuid PRIMARY KEY NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES public.users(id) NOT NULL UNIQUE, 
     artists uuid[] NOT NULL,
     albums uuid[] NOT NULL,
     tracks uuid[] NOT NULL
