@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './model/user.dto';
-import { v4 as uuid } from 'uuid';
 import { UserEntity } from './model/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   private static instance: UserService | null = null;
-  private users: UserEntity[] = [];
+
+  @InjectRepository(UserEntity)
+  private users: Repository<UserEntity>;
 
   constructor() {
     if (UserService.instance) {
@@ -17,25 +20,18 @@ export class UserService {
   }
 
   async add(data: CreateUserDto) {
-    const id = uuid();
-    const timestamp = Date.now();
-
-    const user = new UserEntity({
-      id,
+    const userDto = new UserEntity({
       login: data.login,
       password: data.password,
-      version: 1,
-      createdAt: timestamp,
-      updatedAt: timestamp,
     });
 
-    this.users.push(user);
+    const user = await this.users.save(userDto);
 
     return user;
   }
 
   async get(id: string) {
-    const user = this.users.find((user) => user.id === id);
+    const user = await this.users.findOneBy({ id });
 
     if (!user) {
       throw new Error(`User with id ${id} not found`);
@@ -45,21 +41,21 @@ export class UserService {
   }
 
   async getAll() {
-    return this.users;
+    const users = await this.users.find();
+
+    return users;
   }
 
   async delete(id: string) {
-    await this.get(id);
-
-    this.users = this.users.filter((user) => user.id !== id);
+    await this.users.delete({ id });
   }
 
   async update(id: string, password: UserEntity['password']) {
-    const user = await this.get(id);
+    const userDto = new UserEntity({
+      password,
+    });
 
-    user.password = password;
-    user.updatedAt = Date.now();
-    user.version++;
+    const user = await this.users.save(userDto);
 
     return user;
   }

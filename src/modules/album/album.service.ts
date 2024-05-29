@@ -1,35 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
+import { Injectable } from '@nestjs/common';
 import { AlbumEntity } from './model/album.entity';
 import { AlbumDto } from './model/album.dto';
-import { TrackService } from '../track/track.service';
+// import { TrackService } from '../track/track.service';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AlbumService {
   private static instance: AlbumService | null = null;
-  private albums: AlbumEntity[] = [
-    // {
-    //   id: '050a70a9-7197-430b-b517-780a25b2aed8',
-    //   name: 'consequat exercitation aliquip',
-    //   artistId: '60c15dbc-2031-32d0-4a0f-48080e878c11',
-    //   year: 2015,
-    // },
-    // {
-    //   id: '2ca77a49-4b4c-4fe2-8d13-bd4ce1e08c64',
-    //   name: 'consequat exercitation aliquip',
-    //   artistId: '60c15dbc-2031-32d0-4a0f-48080e878c11',
-    //   year: 2015,
-    // },
-    // {
-    //   id: 'c3e0afc4-28df-4708-bdd5-e188ef6d4dd3',
-    //   name: 'consequat exercitation aliquip',
-    //   artistId: '60c15dbc-2031-32d0-4a0f-48080e878c11',
-    //   year: 2015,
-    // },
-  ];
 
-  @Inject(TrackService)
-  private tracks: TrackService | null = null;
+  @InjectRepository(AlbumEntity)
+  private albums: Repository<AlbumEntity>;
+
+  // @Inject(TrackService)
+  // private tracks: TrackService | null = null;
 
   constructor() {
     if (AlbumService.instance) {
@@ -40,22 +24,19 @@ export class AlbumService {
   }
 
   async add(data: AlbumDto) {
-    const id = uuid();
-
-    const album = new AlbumEntity({
-      id,
+    const albumDto = new AlbumEntity({
       name: data.name,
       artistId: data.artistId,
       year: data.year,
     });
 
-    this.albums.push(album);
+    const album = await this.albums.save(albumDto);
 
     return album;
   }
 
   async get(id: string) {
-    const album = this.albums.find((album) => album.id === id);
+    const album = this.albums.findOneBy({ id });
 
     if (!album) {
       throw new Error(`Album with id ${id} not found`);
@@ -65,28 +46,24 @@ export class AlbumService {
   }
 
   async getAll() {
-    return this.albums;
+    const albums = await this.albums.find();
+
+    return albums;
   }
 
   async delete(id: string) {
-    await this.get(id);
-
-    const tracks = await this.tracks.getAll();
-    const filteredTracks = tracks.filter((track) => track.albumId === id);
-
-    for (const track of filteredTracks) {
-      await this.tracks.update(track.id, { albumId: null });
-    }
-
-    this.albums = this.albums.filter((user) => user.id !== id);
+    await this.albums.delete({ id });
   }
 
   async update(id: string, data: Partial<AlbumDto>) {
-    const album = await this.get(id);
+    const albumDto = new AlbumEntity({
+      id,
+      name: data.name,
+      artistId: data.artistId,
+      year: data.year,
+    });
 
-    album.name = data.name;
-    album.year = data.year;
-    album.artistId = data.artistId;
+    const album = await this.albums.save(albumDto);
 
     return album;
   }

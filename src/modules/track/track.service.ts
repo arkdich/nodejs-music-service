@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
 import { TrackEntity } from './model/track.entity';
 import { TrackDto } from './model/track.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
   private static instance: TrackService | null = null;
-  private tracks: TrackEntity[] = [];
+
+  @InjectRepository(TrackEntity)
+  private tracks: Repository<TrackEntity>;
 
   constructor() {
     if (TrackService.instance) {
@@ -17,23 +20,20 @@ export class TrackService {
   }
 
   async add(data: TrackDto) {
-    const id = uuid();
-
-    const track = new TrackEntity({
-      id,
+    const trackDto = new TrackEntity({
       name: data.name,
       albumId: data.albumId,
       artistId: data.artistId,
       duration: data.duration,
     });
 
-    this.tracks.push(track);
+    const track = await this.tracks.save(trackDto);
 
     return track;
   }
 
   async get(id: string) {
-    const track = this.tracks.find((track) => track.id === id);
+    const track = await this.tracks.findOneBy({ id });
 
     if (!track) {
       throw new Error(`Track with id ${id} not found`);
@@ -43,23 +43,25 @@ export class TrackService {
   }
 
   async getAll() {
-    return this.tracks;
+    const tracks = await this.tracks.find();
+
+    return tracks;
   }
 
   async delete(id: string) {
-    await this.get(id);
-
-    this.tracks = this.tracks.filter((user) => user.id !== id);
+    await this.tracks.delete({ id });
   }
 
   async update(id: string, data: Partial<TrackDto>) {
-    const track = await this.get(id);
-
-    Object.entries(data).forEach(([key, value]) => {
-      if (value !== undefined) {
-        track[key] = value;
-      }
+    const trackDto = new TrackEntity({
+      id,
+      name: data.name,
+      albumId: data.albumId,
+      artistId: data.artistId,
+      duration: data.duration,
     });
+
+    const track = await this.tracks.save(trackDto);
 
     return track;
   }
