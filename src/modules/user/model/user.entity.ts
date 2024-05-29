@@ -1,27 +1,28 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
+@Entity({ schema: 'public', name: 'users', database: 'music_service' })
 export class UserEntity {
   @PrimaryColumn({
-    type: 'uniqueidentifier',
+    name: 'id',
+    type: 'uuid',
   })
   public id: string;
 
-  @Column()
+  @Column({ name: 'login', type: 'varchar' })
   public login: string;
 
-  @Column()
+  @Column({ name: 'password', type: 'varchar' })
   @Exclude()
   public password: string;
 
-  @Column()
+  @Column({ name: 'version', type: 'int' })
   public version: number;
 
-  @Column()
+  @Column({ name: 'created_at', type: 'time with time zone' })
   public createdAt: number;
 
-  @Column()
+  @Column({ name: 'updated_at', type: 'time with time zone' })
   public updatedAt: number;
 
   constructor(data: Partial<UserEntity>) {

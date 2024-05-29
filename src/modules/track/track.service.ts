@@ -6,29 +6,7 @@ import { TrackDto } from './model/track.dto';
 @Injectable()
 export class TrackService {
   private static instance: TrackService | null = null;
-  private tracks: TrackEntity[] = [
-    // {
-    //   id: 'a7812f71-b070-4bdc-b7a7-e4dda7785b27',
-    //   name: 'Stressted Out',
-    //   albumId: '845b994c-f4f5-1279-6b18-dae7635290bf',
-    //   artistId: 'fae6a2d2-9522-9a7c-57b2-20600bc46df8',
-    //   duration: 251,
-    // },
-    // {
-    //   id: '91e2bc60-a1e3-4ba9-8fa3-2116868cb178',
-    //   name: 'Stressted Out',
-    //   albumId: '845b994c-f4f5-1279-6b18-dae7635290bf',
-    //   artistId: 'fae6a2d2-9522-9a7c-57b2-20600bc46df8',
-    //   duration: 251,
-    // },
-    // {
-    //   id: '0d2e1130-7248-434d-ad9a-ad237d59aee0',
-    //   name: 'Stressted Out',
-    //   albumId: '845b994c-f4f5-1279-6b18-dae7635290bf',
-    //   artistId: 'fae6a2d2-9522-9a7c-57b2-20600bc46df8',
-    //   duration: 251,
-    // },
-  ];
+  private tracks: TrackEntity[] = [];
 
   constructor() {
     if (TrackService.instance) {

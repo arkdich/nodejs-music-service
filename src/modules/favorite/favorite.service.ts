@@ -8,6 +8,7 @@ import { FavoriteEntity } from './model/favorite.entity';
 export class FavoriteService {
   private static instance: FavoriteService | null = null;
   private favorites: FavoriteEntity = {
+    id: '050a70a9-7197-430b-b517-780a25b2aed9',
     // albums: ['050a70a9-7197-430b-b517-780a25b2aed8'],
     // artists: ['9e8d780f-b835-4932-baf7-4475a66bcc42'],
     // tracks: ['a7812f71-b070-4bdc-b7a7-e4dda7785b27'],

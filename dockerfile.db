@@ -1,6 +1,6 @@
 FROM postgres:alpine
 WORKDIR /db
 
-COPY ./src/database /docker-entrypoint-initdb.d
+COPY ./src/database/sql /docker-entrypoint-initdb.d
 
 EXPOSE 5432
