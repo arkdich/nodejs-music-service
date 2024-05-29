@@ -1,23 +1,47 @@
 \c music_service
 
-insert into public.artist (name,grammy) values ('Twenty One Pilots',true);
-insert into public.artist (name,grammy) values ('Taylor Swift',true);
-insert into public.artist (name,grammy) values ('The Neighbourhood',false);
-insert into public.artist (name,grammy) values ('The Weeknd',true);
+DO $$
+DECLARE
+    twenty_one_pilots VARCHAR(100) := 'Twenty One Pilots';
+    arctic_monkeys VARCHAR(100) := 'Arctic Monkeys';
+    the_neighbourhood VARCHAR(100) := 'The Neighbourhood';
+    red_hot_chilli_peppers VARCHAR(100) := 'Red Hot Chilli Peppers';
 
--- insert into public.album (name,artist_id,release_date) values ('Blurryface',1,'2015-05-17');
--- insert into public.album (name,artist_id,release_date) values ('Trench',1,'2018-10-05');
--- insert into public.album (name,artist_id,release_date) values ('Red',2,'2012-10-22');
--- insert into public.album (name,artist_id,release_date) values ('Reputation',2,'2017-11-10');
--- insert into public.album (name,artist_id,release_date) values ('I Love You',3,'2013-04-23');
--- insert into public.album (name,artist_id,release_date) values ('Wiped Out!',3,'2015-10-30');
+    twenty_one_pilots_id uuid;
+    arctic_monkeys_id uuid;
+    the_neighbourhood_id uuid;
+    red_hot_chilli_peppers_id uuid;
+BEGIN
+    INSERT INTO public.artist (name,grammy) VALUES
+    (twenty_one_pilots,true),
+    (arctic_monkeys,true),
+    (red_hot_chilli_peppers,true),
+    (the_neighbourhood,false);
 
--- insert into public.track (name,album_id) values ('Stressed Out',1);
--- insert into public.track (name,album_id) values ('Ride',1);
--- insert into public.track (name,album_id) values ('Heathens',1);
--- insert into public.track (name,album_id) values ('Jumpsuit',2);
--- insert into public.track (name,album_id) values ('Levitate',2);
--- insert into public.track (name,album_id) values ('Look What You Made Me Do',4);
--- insert into public.track (name,album_id) values ('Sweater Weather',5);
--- insert into public.track (name,album_id) values ('R.I.P. 2 My Youth',6);
--- insert into public.track (name,album_id) values ('Daddy Issues',6);
+    SELECT id INTO twenty_one_pilots_id FROM public.artist WHERE name = twenty_one_pilots;
+    SELECT id INTO arctic_monkeys_id FROM public.artist WHERE name = arctic_monkeys;
+    SELECT id INTO red_hot_chilli_peppers_id FROM public.artist WHERE name = red_hot_chilli_peppers;
+    SELECT id INTO the_neighbourhood_id FROM public.artist WHERE name = the_neighbourhood;
+
+    INSERT INTO public.album (name,artist_id,year) VALUES
+    ('Blurryface',twenty_one_pilots_id,2015),
+    ('Trench',twenty_one_pilots_id,2018),
+    ('I Love You',the_neighbourhood_id,2013),
+    ('Wiped Out!',the_neighbourhood_id,2015),
+    ('Favorite Worst Nightmare',arctic_monkeys_id,2007),
+    ('AM',arctic_monkeys_id,2013),
+    ('By the Way',red_hot_chilli_peppers_id,2002),
+    ('Californication',red_hot_chilli_peppers_id,1999);
+
+    INSERT INTO public.track (name,artist_id,duration) VALUES
+    ('Stressed Out',twenty_one_pilots_id,200),
+    ('Heavydirtysoul',twenty_one_pilots_id,234),
+    ('Heathens',twenty_one_pilots_id,190),
+    ('Levitate',twenty_one_pilots_id,190),
+    ('R.I.P. 2 My Youth',the_neighbourhood_id,190),
+    ('Daddy Issues',the_neighbourhood_id,200),
+    ('Do I Wanna Know?',arctic_monkeys_id,200),
+    ('R U Mine?',arctic_monkeys_id,190),
+    ('By the Way',red_hot_chilli_peppers_id,200),
+    ('Can''t Stop',red_hot_chilli_peppers_id,190);
+END $$
