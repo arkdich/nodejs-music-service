@@ -1,30 +1,20 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { TrackService } from '../track/track.service';
-import { AlbumService } from '../album/album.service';
-import { ArtistService } from '../artist/artist.service';
-import { FavoriteEntity } from './model/favorite.entity';
+import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import {
+  FavoriteAlbumEntity,
+  FavoriteArtistEntity,
+  FavoriteTrackEntity,
+  FavoritesResponse,
+} from './model/favorite.entity';
 
+const DEFAULT_USER_ID = 'c728225e-50b3-45aa-8a30-feebeb73ff98';
 @Injectable()
 export class FavoriteService {
   private static instance: FavoriteService | null = null;
-  private favorites: FavoriteEntity = {
-    id: '050a70a9-7197-430b-b517-780a25b2aed9',
-    // albums: ['050a70a9-7197-430b-b517-780a25b2aed8'],
-    // artists: ['9e8d780f-b835-4932-baf7-4475a66bcc42'],
-    // tracks: ['a7812f71-b070-4bdc-b7a7-e4dda7785b27'],
-    albums: [],
-    artists: [],
-    tracks: [],
-  };
 
-  @Inject(TrackService)
-  private trackService: TrackService | null = null;
-
-  @Inject(AlbumService)
-  private albumService: AlbumService | null = null;
-
-  @Inject(ArtistService)
-  private artistService: ArtistService | null = null;
+  @InjectRepository(FavoriteAlbumEntity)
+  private albums: Repository<FavoriteAlbumEntity>;
 
   constructor() {
     if (FavoriteService.instance) {
@@ -35,76 +25,116 @@ export class FavoriteService {
   }
 
   async addAlbum(id: string) {
-    const album = await this.albumService.get(id);
+    const favoriteDto = new FavoriteAlbumEntity({
+      userId: DEFAULT_USER_ID,
+      albumId: id,
+    });
 
-    if (this.favorites.albums.includes(album.id)) return;
-
-    this.favorites.albums.push(album.id);
+    await this.albums
+      .createQueryBuilder('insert_album_query')
+      .insert()
+      .into(FavoriteAlbumEntity)
+      .values(favoriteDto)
+      .orIgnore()
+      .execute();
   }
 
   async addTrack(id: string) {
-    const track = await this.trackService.get(id);
+    const favoriteDto = new FavoriteTrackEntity({
+      userId: DEFAULT_USER_ID,
+      trackId: id,
+    });
 
-    if (this.favorites.tracks.includes(track.id)) return;
-
-    this.favorites.tracks.push(track.id);
+    await this.albums
+      .createQueryBuilder('insert_track_query')
+      .insert()
+      .into(FavoriteTrackEntity)
+      .values(favoriteDto)
+      .orIgnore()
+      .execute();
   }
 
   async addArtist(id: string) {
-    const artist = await this.artistService.get(id);
+    const favoriteDto = new FavoriteArtistEntity({
+      userId: DEFAULT_USER_ID,
+      artistId: id,
+    });
 
-    if (this.favorites.artists.includes(artist.id)) return;
-
-    this.favorites.artists.push(artist.id);
+    await this.albums
+      .createQueryBuilder('insert_album_query')
+      .insert()
+      .into(FavoriteArtistEntity)
+      .values(favoriteDto)
+      .orIgnore()
+      .execute();
   }
 
   async deleteAlbum(id: string) {
-    const album = await this.albumService.get(id);
-
-    this.favorites.albums = this.favorites.albums.filter(
-      (id) => id !== album.id,
-    );
+    await this.albums
+      .createQueryBuilder('delete_album_query')
+      .delete()
+      .from(FavoriteTrackEntity)
+      .where('albumId = :albumId AND userId = :userId', {
+        albumId: id,
+        userId: DEFAULT_USER_ID,
+      })
+      .execute();
   }
 
   async deleteTrack(id: string) {
-    const track = await this.trackService.get(id);
-
-    this.favorites.tracks = this.favorites.tracks.filter(
-      (id) => id !== track.id,
-    );
+    await this.albums
+      .createQueryBuilder('delete_track_query')
+      .delete()
+      .from(FavoriteTrackEntity)
+      .where('trackId = :trackId AND userId = :userId', {
+        trackId: id,
+        userId: DEFAULT_USER_ID,
+      })
+      .execute();
   }
 
   async deleteArtist(id: string) {
-    const artist = await this.artistService.get(id);
-
-    this.favorites.artists = this.favorites.artists.filter(
-      (id) => id !== artist.id,
-    );
+    await this.albums
+      .createQueryBuilder('delete_artist_query')
+      .delete()
+      .from(FavoriteArtistEntity)
+      .where('artistId = :artistId AND userId = :userId', {
+        artistId: id,
+        userId: DEFAULT_USER_ID,
+      })
+      .execute();
   }
 
   async get() {
-    const tracks = await Promise.allSettled(
-      this.favorites.tracks.map((id) => this.trackService.get(id)),
+    const favs: FavoritesResponse = await this.albums.query(
+      `
+      WITH fav_tracks AS (
+        SELECT user_id, jsonb_agg(track_id) as tracks
+        FROM favorite_track
+        WHERE user_id = $1
+        GROUP BY user_id
+      ), fav_albums AS (
+        SELECT user_id, jsonb_agg(album_id) as albums
+        FROM favorite_album
+        WHERE user_id = $1
+        GROUP BY user_id
+      ), fav_artists AS (
+        SELECT user_id, jsonb_agg(artist_id) as artists
+        FROM favorite_artist
+        WHERE user_id = $1
+        GROUP BY user_id
+      )
+      SELECT
+      COALESCE(tracks, '[]') as tracks,
+      COALESCE(albums, '[]') as albums,
+      COALESCE(artists, '[]') as artists
+      FROM fav_tracks
+      LEFT JOIN fav_albums ON fav_tracks.user_id = fav_albums.user_id
+      LEFT JOIN fav_artists ON fav_tracks.user_id = fav_artists.user_id
+      `,
+      [DEFAULT_USER_ID],
     );
 
-    const albums = await Promise.allSettled(
-      this.favorites.albums.map((id) => this.albumService.get(id)),
-    );
-
-    const artists = await Promise.allSettled(
-      this.favorites.artists.map((id) => this.artistService.get(id)),
-    );
-
-    return {
-      tracks: tracks
-        .map((track) => (track.status === 'fulfilled' ? track.value : null))
-        .filter(Boolean),
-      albums: albums
-        .map((album) => (album.status === 'fulfilled' ? album.value : null))
-        .filter(Boolean),
-      artists: artists
-        .map((artist) => (artist.status === 'fulfilled' ? artist.value : null))
-        .filter(Boolean),
-    };
+    return favs.at(0);
   }
 }
