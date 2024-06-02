@@ -1,4 +1,5 @@
 \c music_service
+\set default_user_id 'c728225e-50b3-45aa-8a30-feebeb73ff98'
 
 DO $$
 DECLARE
@@ -11,15 +12,12 @@ DECLARE
     arctic_monkeys_id uuid;
     the_neighbourhood_id uuid;
     red_hot_chilli_peppers_id uuid;
-
-    artesha_id uuid;
 BEGIN
     INSERT INTO public.users (login,password) VALUES
         ('root','admin');
 
-    INSERT INTO public.users (login,password) VALUES
-        ('artesha','qwerty')
-    RETURNING id INTO artesha_id;
+    INSERT INTO public.users (id,login,password) VALUES
+        ('c728225e-50b3-45aa-8a30-feebeb73ff98','artesha','qwerty');
 
     INSERT INTO public.artist (name,grammy) VALUES
         (twenty_one_pilots,true)
