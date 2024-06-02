@@ -1,7 +1,11 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlbumEntity } from 'src/modules/album/model/album.entity';
 import { ArtistEntity } from 'src/modules/artist/model/artist.entity';
-import { FavoriteEntity } from 'src/modules/favorite/model/favorite.entity';
+import {
+  FavoriteAlbumEntity,
+  FavoriteArtistEntity,
+  FavoriteTrackEntity,
+} from 'src/modules/favorite/model/favorite.entity';
 import { TrackEntity } from 'src/modules/track/model/track.entity';
 import { UserEntity } from 'src/modules/user/model/user.entity';
 
@@ -19,7 +23,9 @@ export const TypeOrmSettings = TypeOrmModule.forRoot({
     ArtistEntity,
     TrackEntity,
     AlbumEntity,
-    FavoriteEntity,
+    FavoriteArtistEntity,
+    FavoriteAlbumEntity,
+    FavoriteTrackEntity,
   ],
   synchronize: false,
   logging: true,
