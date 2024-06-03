@@ -7,3 +7,14 @@ export class LoginDto {
   @IsString()
   password: string;
 }
+
+export class ChangePasswordDto {
+  @IsString()
+  currentPassword: string;
+
+  @IsString()
+  password: string;
+
+  @IsString()
+  passwordConfirm: string;
+}

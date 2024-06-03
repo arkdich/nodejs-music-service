@@ -1,11 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { LoginDto } from './model/auth.dto';
+import { ChangePasswordDto, LoginDto } from './model/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user/model/user.entity';
 import { compare } from 'bcrypt';
 import { Repository } from 'typeorm';
 import { config } from 'dotenv';
+import { UserService } from '../user/user.service';
 
 config({ path: ['.env.local'] });
 
@@ -16,7 +17,10 @@ export class AuthService {
   @InjectRepository(UserEntity)
   private userRepository: Repository<UserEntity>;
 
-  constructor(private jwtService: JwtService) {
+  constructor(
+    private jwtService: JwtService,
+    private userService: UserService,
+  ) {
     if (AuthService.instance) {
       return AuthService.instance;
     }
@@ -38,6 +42,28 @@ export class AuthService {
     };
   }
 
+  async changePassword(
+    userId: string,
+    { currentPassword, password, passwordConfirm }: ChangePasswordDto,
+  ) {
+    const { user } = await this.validateUser({
+      id: userId,
+      password: currentPassword,
+    });
+
+    if (password !== passwordConfirm) {
+      throw new HttpException('Пароли не совпадают', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.userService.update(user.id, password);
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.userService.get(userId);
+
+    return user;
+  }
+
   async validateUser({
     id,
     login,
@@ -54,7 +80,7 @@ export class AuthService {
     if (!isValid) {
       throw new HttpException(
         'Текущий пароль указан неверно',
-        HttpStatus.FORBIDDEN,
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -64,7 +90,7 @@ export class AuthService {
     };
   }
 
-  async generateTokens({
+  private async generateTokens({
     id,
     login,
   }: Partial<Pick<UserEntity, 'id' | 'login'>>) {
