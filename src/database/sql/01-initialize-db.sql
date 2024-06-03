@@ -64,4 +64,3 @@ CREATE TABLE public.favorite_track (
     updated_at timestamp with time zone NOT NULL DEFAULT now(),
     UNIQUE (user_id, track_id)
 );
-
