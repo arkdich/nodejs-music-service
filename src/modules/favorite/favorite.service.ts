@@ -73,7 +73,7 @@ export class FavoriteService {
     await this.albums
       .createQueryBuilder('delete_album_query')
       .delete()
-      .from(FavoriteTrackEntity)
+      .from(FavoriteAlbumEntity)
       .where('albumId = :albumId AND userId = :userId', {
         albumId: id,
         userId: DEFAULT_USER_ID,
