@@ -55,7 +55,7 @@ export class UserService {
       password,
     });
 
-    const user = await this.users.save(userDto);
+    const user = await this.users.update({ id }, userDto);
 
     return user;
   }
