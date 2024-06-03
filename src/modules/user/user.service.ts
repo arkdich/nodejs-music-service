@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './model/user.dto';
 import { UserEntity } from './model/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
+import { generateHash } from './lib/generate-hash';
 
 @Injectable()
 export class UserService {
@@ -20,22 +21,26 @@ export class UserService {
   }
 
   async add(data: CreateUserDto) {
+    const passwordHash = await generateHash(data.password);
+
     const userDto = new UserEntity({
       login: data.login,
-      password: data.password,
+      password: passwordHash,
     });
 
-    const user = await this.users.save(userDto);
+    const user = await this.users
+      .createQueryBuilder('insert_user')
+      .insert()
+      .into(UserEntity)
+      .values(userDto)
+      .returning('*')
+      .execute();
 
-    return user;
+    return this.users.create(user.generatedMaps[0]);
   }
 
   async get(id: string) {
     const user = await this.users.findOneBy({ id });
-
-    if (!user) {
-      throw new Error(`User with id ${id} not found`);
-    }
 
     return user;
   }
@@ -47,16 +52,27 @@ export class UserService {
   }
 
   async delete(id: string) {
-    await this.users.delete({ id });
+    let result: DeleteResult | null = null;
+
+    try {
+      result = await this.users.delete({ id });
+    } catch (err) {
+      throw new HttpException(
+        'У пользователя остаются неудаленные записи',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (result?.affected === 0) {
+      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+    }
   }
 
   async update(id: string, password: UserEntity['password']) {
-    const userDto = new UserEntity({
-      password,
-    });
+    const passwordHash = await generateHash(password);
 
-    const user = await this.users.update({ id }, userDto);
+    await this.users.update({ id }, { password: passwordHash });
 
-    return user;
+    return passwordHash;
   }
 }

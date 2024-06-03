@@ -10,5 +10,7 @@ export const setupSwagger = (app: INestApplication) => {
   const apiYaml = readFileSync(filePath, 'utf8');
   const document = parse(apiYaml);
 
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: { tryItOutEnabled: true },
+  });
 };

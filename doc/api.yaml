@@ -286,11 +286,36 @@ paths:
         404:
           description: User not found
 
-    put:
+    delete:
       tags:
         - Users
-      summary: Update a user's password
-      description: Updates a user's password by ID
+      summary: Delete user
+      description: Deletes user by ID.
+      responses:
+        204:
+          description: The user has been deleted
+        400:
+          description: Bad request. id is invalid (not uuid)
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        404:
+          description: User not found
+
+  /user/{id}/password:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          default: 123e4567-e89b-12d3-a456-426614174000
+
+    patch:
+      tags:
+        - Users
+      summary: Update user's password
+      description: Updates user's password by ID
       requestBody:
         required: true
         content:
@@ -312,32 +337,13 @@ paths:
                 - newPassword
       responses:
         200:
-          description: The user has been updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
+          description: The password has been updated
         400:
-          description: Bad request. id is invalid (not uuid)
+          description: Bad request. Id is invalid (not uuid)
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
-          description: oldPassword is wrong
-        404:
-          description: User not found
-
-    delete:
-      tags:
-        - Users
-      summary: Delete user
-      description: Deletes user by ID.
-      responses:
-        204:
-          description: The user has been deleted
-        400:
-          description: Bad request. id is invalid (not uuid)
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
+          description: Wrong current password
         404:
           description: User not found
 
