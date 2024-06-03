@@ -14,11 +14,14 @@ import {
 import { CreateUserDto, UpdatePasswordDto } from './model/user.dto';
 import { UserService } from './user.service';
 import { UserEntity } from './model/user.entity';
-import { compare } from 'bcrypt';
+import { AuthService } from '../auth/auth.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private authService: AuthService,
+  ) {}
 
   @Get(':id')
   async get(@Param('id', new ParseUUIDPipe()) id: string): Promise<UserEntity> {
@@ -66,23 +69,10 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async updatePassword(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: UpdatePasswordDto,
+    @Body() { oldPassword, newPassword }: UpdatePasswordDto,
   ) {
-    const user = await this.userService.get(id);
+    await this.authService.validateUser({ id, password: oldPassword });
 
-    if (!user) {
-      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
-    }
-
-    const isValid = await compare(body.oldPassword, user.password);
-
-    if (!isValid) {
-      throw new HttpException(
-        'Текущий пароль указан неверно',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
-    await this.userService.update(id, body.newPassword);
+    await this.userService.update(id, newPassword);
   }
 }
