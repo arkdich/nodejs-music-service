@@ -8,7 +8,6 @@ import {
   FavoritesResponse,
 } from './model/favorite.entity';
 
-const DEFAULT_USER_ID = 'c728225e-50b3-45aa-8a30-feebeb73ff98';
 @Injectable()
 export class FavoriteService {
   private static instance: FavoriteService | null = null;
@@ -24,10 +23,10 @@ export class FavoriteService {
     FavoriteService.instance = this;
   }
 
-  async addAlbum(id: string) {
+  async addAlbum({ userId, albumId }: { userId: string; albumId: string }) {
     const favoriteDto = new FavoriteAlbumEntity({
-      userId: DEFAULT_USER_ID,
-      albumId: id,
+      userId,
+      albumId,
     });
 
     await this.albums
@@ -39,10 +38,10 @@ export class FavoriteService {
       .execute();
   }
 
-  async addTrack(id: string) {
+  async addTrack({ userId, trackId }: { userId: string; trackId: string }) {
     const favoriteDto = new FavoriteTrackEntity({
-      userId: DEFAULT_USER_ID,
-      trackId: id,
+      userId,
+      trackId,
     });
 
     await this.albums
@@ -54,10 +53,10 @@ export class FavoriteService {
       .execute();
   }
 
-  async addArtist(id: string) {
+  async addArtist({ userId, artistId }: { userId: string; artistId: string }) {
     const favoriteDto = new FavoriteArtistEntity({
-      userId: DEFAULT_USER_ID,
-      artistId: id,
+      userId,
+      artistId,
     });
 
     await this.albums
@@ -69,43 +68,49 @@ export class FavoriteService {
       .execute();
   }
 
-  async deleteAlbum(id: string) {
+  async deleteAlbum({ userId, albumId }: { userId: string; albumId: string }) {
     await this.albums
       .createQueryBuilder('delete_album_query')
       .delete()
       .from(FavoriteAlbumEntity)
       .where('albumId = :albumId AND userId = :userId', {
-        albumId: id,
-        userId: DEFAULT_USER_ID,
+        albumId,
+        userId,
       })
       .execute();
   }
 
-  async deleteTrack(id: string) {
+  async deleteTrack({ userId, trackId }: { userId: string; trackId: string }) {
     await this.albums
       .createQueryBuilder('delete_track_query')
       .delete()
       .from(FavoriteTrackEntity)
       .where('trackId = :trackId AND userId = :userId', {
-        trackId: id,
-        userId: DEFAULT_USER_ID,
+        trackId,
+        userId,
       })
       .execute();
   }
 
-  async deleteArtist(id: string) {
+  async deleteArtist({
+    userId,
+    artistId,
+  }: {
+    userId: string;
+    artistId: string;
+  }) {
     await this.albums
       .createQueryBuilder('delete_artist_query')
       .delete()
       .from(FavoriteArtistEntity)
       .where('artistId = :artistId AND userId = :userId', {
-        artistId: id,
-        userId: DEFAULT_USER_ID,
+        artistId,
+        userId,
       })
       .execute();
   }
 
-  async get() {
+  async get({ userId }: { userId: string }) {
     const favs: FavoritesResponse = await this.albums.query(
       `
       WITH fav_tracks AS (
@@ -132,7 +137,7 @@ export class FavoriteService {
       LEFT JOIN fav_albums ON fav_tracks.user_id = fav_albums.user_id
       LEFT JOIN fav_artists ON fav_tracks.user_id = fav_artists.user_id
       `,
-      [DEFAULT_USER_ID],
+      [userId],
     );
 
     return favs.at(0);

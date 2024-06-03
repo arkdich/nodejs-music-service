@@ -10,23 +10,28 @@ import {
   Post,
 } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
+import { Jwt } from 'src/shared/decorators/Jwt';
+import { UserJwt } from '../auth/model/auth.type';
 
 @Controller('favs')
 export class FavoriteController {
   constructor(private favoriteService: FavoriteService) {}
 
   @Get()
-  async get() {
-    const favorites = await this.favoriteService.get();
+  async get(@Jwt() user: UserJwt) {
+    const favorites = await this.favoriteService.get({ userId: user.id });
 
     return favorites;
   }
 
   @Post('track/:id')
   @HttpCode(HttpStatus.CREATED)
-  async addTrack(@Param('id', new ParseUUIDPipe()) id: string) {
+  async addTrack(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Jwt() user: UserJwt,
+  ) {
     try {
-      await this.favoriteService.addTrack(id);
+      await this.favoriteService.addTrack({ userId: user.id, trackId: id });
 
       return { message: `Track with id ${id} added to favorites` };
     } catch (err) {
@@ -36,9 +41,12 @@ export class FavoriteController {
 
   @Delete('track/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteTrack(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteTrack(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Jwt() user: UserJwt,
+  ) {
     try {
-      await this.favoriteService.deleteTrack(id);
+      await this.favoriteService.deleteTrack({ userId: user.id, trackId: id });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     }
@@ -46,9 +54,12 @@ export class FavoriteController {
 
   @Post('album/:id')
   @HttpCode(HttpStatus.CREATED)
-  async addAlbum(@Param('id', new ParseUUIDPipe()) id: string) {
+  async addAlbum(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Jwt() user: UserJwt,
+  ) {
     try {
-      await this.favoriteService.addAlbum(id);
+      await this.favoriteService.addAlbum({ userId: user.id, albumId: id });
 
       return { message: `Album with id ${id} added to favorites` };
     } catch (err) {
@@ -58,9 +69,12 @@ export class FavoriteController {
 
   @Delete('album/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAlbum(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteAlbum(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Jwt() user: UserJwt,
+  ) {
     try {
-      await this.favoriteService.deleteAlbum(id);
+      await this.favoriteService.deleteAlbum({ userId: user.id, albumId: id });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     }
@@ -68,9 +82,12 @@ export class FavoriteController {
 
   @Post('artist/:id')
   @HttpCode(HttpStatus.CREATED)
-  async addArtist(@Param('id', new ParseUUIDPipe()) id: string) {
+  async addArtist(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Jwt() user: UserJwt,
+  ) {
     try {
-      await this.favoriteService.addArtist(id);
+      await this.favoriteService.addArtist({ userId: user.id, artistId: id });
 
       return { message: `Artist with id ${id} added to favorites` };
     } catch (err) {
@@ -80,9 +97,15 @@ export class FavoriteController {
 
   @Delete('artist/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteArtist(@Param('id', new ParseUUIDPipe()) id: string) {
+  async deleteArtist(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Jwt() user: UserJwt,
+  ) {
     try {
-      await this.favoriteService.deleteArtist(id);
+      await this.favoriteService.deleteArtist({
+        userId: user.id,
+        artistId: id,
+      });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     }
