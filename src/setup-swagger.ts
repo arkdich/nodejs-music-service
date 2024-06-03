@@ -11,6 +11,6 @@ export const setupSwagger = (app: INestApplication) => {
   const document = parse(apiYaml);
 
   SwaggerModule.setup('api-docs', app, document, {
-    swaggerOptions: { tryItOutEnabled: true },
+    swaggerOptions: { tryItOutEnabled: true, persistAuthorization: true },
   });
 };
