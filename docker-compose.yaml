@@ -21,3 +21,4 @@ services:
     container_name: music-service-api-container
     environment:
       - PORT_DB=5432
+      - DB_HOST=database

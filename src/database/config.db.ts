@@ -8,15 +8,29 @@ import {
 } from 'src/modules/favorite/model/favorite.entity';
 import { TrackEntity } from 'src/modules/track/model/track.entity';
 import { UserEntity } from 'src/modules/user/model/user.entity';
+import { config } from 'dotenv';
 
-export const PORT_DB = Number(process.env.PORT_DB);
+config({
+  path: ['.env.local'],
+});
+
+const PORT_DB = Number(process.env.PORT_DB);
+const DB_HOST = process.env.DB_HOST;
+const POSTGRES_USER = process.env.POSTGRES_USER;
+const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD;
+
+if (!PORT_DB || !POSTGRES_USER || !POSTGRES_PASSWORD) {
+  throw new Error(
+    'Missing environment variables for database configuration, make sure .env.local is properly configured',
+  );
+}
 
 export const TypeOrmSettings = TypeOrmModule.forRoot({
   type: 'postgres',
-  host: 'localhost',
+  host: DB_HOST,
   port: PORT_DB,
-  username: 'artesha',
-  password: 'pswd',
+  username: POSTGRES_USER,
+  password: POSTGRES_PASSWORD,
   database: 'music_service',
   entities: [
     UserEntity,

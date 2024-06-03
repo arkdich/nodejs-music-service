@@ -3,7 +3,6 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import 'reflect-metadata';
-import './database/config.db';
 
 export const PORT_API = Number(process.env.PORT_API);
 
