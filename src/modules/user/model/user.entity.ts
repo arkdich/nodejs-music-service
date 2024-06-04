@@ -12,6 +12,12 @@ export class UserEntity {
   @Column({ name: 'login', type: 'varchar' })
   public login: string;
 
+  @Column({ name: 'email', type: 'varchar' })
+  public email: string;
+
+  @Column({ name: 'is_active', type: 'boolean' })
+  public isActive: boolean;
+
   @Column({ name: 'password', type: 'varchar' })
   @Exclude()
   public password: string;

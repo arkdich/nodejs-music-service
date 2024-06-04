@@ -90,7 +90,7 @@ export class AuthService {
     };
   }
 
-  private async generateTokens({
+  async generateTokens({
     id,
     login,
   }: Partial<Pick<UserEntity, 'id' | 'login'>>) {

@@ -4,11 +4,22 @@ CREATE DATABASE music_service;
 CREATE TABLE public.users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), 
     login character varying(100) NOT NULL UNIQUE,
+    email character varying(100) NOT NULL UNIQUE,
     password character varying(100) NOT NULL,
+    is_active boolean NOT NULL DEFAULT false,
     version integer NOT NULL DEFAULT 1,
     created_at timestamp with time zone NOT NULL DEFAULT now(),
     updated_at timestamp with time zone NOT NULL DEFAULT now()
 );
+
+-- CREATE TABLE public.user_tokens (
+--     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), 
+--     user_id uuid REFERENCES public.users(id),
+--     refresh_token text NOT NULL,
+--     created_at timestamp with time zone NOT NULL DEFAULT now(),
+--     updated_at timestamp with time zone NOT NULL DEFAULT now(),
+--     UNIQUE (user_id, refresh_token)
+-- );
 
 CREATE TABLE public.artist (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), 

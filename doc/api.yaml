@@ -186,9 +186,49 @@ paths:
                   type: string
                   description: Password
                   example: qwerty
-              required:
-                - user
-                - login
+      responses:
+        200:
+          description: Successful login.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                description: JWT Tokens
+        401:
+          description: Incorrect login or password
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      security: []
+      summary: Register
+      description: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                login:
+                  type: string
+                  description: Username
+                  example: artesha
+                password:
+                  type: string
+                  description: Password
+                  example: qwerty
+                email:
+                  type: string
+                  description: Email
+                  example: qwerty@qwrt.com
       responses:
         200:
           description: Successful login.

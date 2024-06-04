@@ -24,6 +24,7 @@ export class UserService {
     const passwordHash = await generateHash(data.password);
 
     const userDto = new UserEntity({
+      email: data.email,
       login: data.login,
       password: passwordHash,
     });

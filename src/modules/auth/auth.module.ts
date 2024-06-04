@@ -6,6 +6,7 @@ import { config } from 'dotenv';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/model/user.entity';
 import { UserModule } from '../user/user.module';
+import { MailService } from 'src/shared/servises/MailService';
 
 config({ path: ['.env.local'] });
 
@@ -18,6 +19,6 @@ config({ path: ['.env.local'] });
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, MailService],
 })
 export class AuthModule {}

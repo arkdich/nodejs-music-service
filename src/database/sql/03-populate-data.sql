@@ -13,11 +13,11 @@ DECLARE
     the_neighbourhood_id uuid;
     red_hot_chilli_peppers_id uuid;
 BEGIN
-    INSERT INTO public.users (login,password) VALUES
-        ('root','$2b$10$SCnaMEGOot.mCpv2wyyBTOmF5Z6/3z1IaaHKbbhLwELeU.3SL.LHC');
+    INSERT INTO public.users (login,email,password) VALUES
+        ('root','root@admin.com','$2b$10$SCnaMEGOot.mCpv2wyyBTOmF5Z6/3z1IaaHKbbhLwELeU.3SL.LHC');
 
-    INSERT INTO public.users (id,login,password) VALUES
-        ('c728225e-50b3-45aa-8a30-feebeb73ff98','artesha','$2b$10$97ubwKLHZ5S393NC4ucAx.vl3jDjW9mJ1o7nVCCmsIx1JKIvDEkJe');
+    INSERT INTO public.users (id,login,email,password) VALUES
+        ('c728225e-50b3-45aa-8a30-feebeb73ff98','artesha','artem002498@gmail.com','$2b$10$97ubwKLHZ5S393NC4ucAx.vl3jDjW9mJ1o7nVCCmsIx1JKIvDEkJe');
 
     INSERT INTO public.artist (name,grammy) VALUES
         (twenty_one_pilots,true)

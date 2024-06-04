@@ -49,7 +49,7 @@ export class UserController {
       return user;
     } catch (err) {
       throw new HttpException(
-        `Пользователь ${body.login} уже существует`,
+        `${body.email} или ${body.login} уже существуют`,
         HttpStatus.CONFLICT,
       );
     }
