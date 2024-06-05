@@ -20,14 +20,14 @@ npm install
 
 ## Creating config file
 
-- Create file .env.local in root directory and put environment variables in it, they wiil be used to configure application
-  - POSTGRES_USER - username to access database
-  - POSTGRES_PASSWORD
-  - CRYPT_SALT=10 - salt used for password hashing
-  - JWT_SECRET_KEY - secret to generate access token
-  - JWT_SECRET_REFRESH_KEY - secret to generate refresh token
-  - SMTP_USER - account to send email from (IMAP must be configured)
-  - SMTP_PASSWORD
+Create file .env.local in root directory and put environment variables in it, they wiil be used to configure application
+- POSTGRES_USER - username to access database
+- POSTGRES_PASSWORD
+- CRYPT_SALT=10 - salt used for password hashing
+- JWT_SECRET_KEY - secret to generate access token
+- JWT_SECRET_REFRESH_KEY - secret to generate refresh token
+- SMTP_USER - account to send email from (IMAP must be configured)
+- SMTP_PASSWORD
 
 ## Running application with database
 
@@ -39,6 +39,9 @@ npm run start:compose
 
 ```sh
 npm run start:compose -- database
+```
+
+```sh
 npm run start:dev
 ```
 
