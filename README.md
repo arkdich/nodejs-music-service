@@ -1,14 +1,15 @@
-# Home Library Service
+# Music Service
 
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/package-manager) and the npm package manager.
+- Docker - [Download & Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ## Downloading
 
 ```sh
-git clone {repository URL}
+git clone git@github.com:arkdich/nodejs-music-service.git
 ```
 
 ## Installing NPM modules
@@ -17,50 +18,32 @@ git clone {repository URL}
 npm install
 ```
 
-## Running application
+## Creating config file
+
+- Create file .env.local in root directory and put environment variables in it, they wiil be used to configure application
+  - POSTGRES_USER - username to access database
+  - POSTGRES_PASSWORD
+  - CRYPT_SALT=10 - salt used for password hashing
+  - JWT_SECRET_KEY - secret to generate access token
+  - JWT_SECRET_REFRESH_KEY - secret to generate refresh token
+  - SMTP_USER - account to send email from (IMAP must be configured)
+  - SMTP_PASSWORD
+
+## Running application with database
 
 ```sh
-npm start
+npm run start:compose
 ```
 
-## Building postgresql image and staring container
+## Run database in container and application in dev mode
 
-- Create file .env.local in root directory and put POSTGRES_USER and POSTGRES_PASSWORD variables in it, this username and password will be used to connect to the database
-- Create database image with npm run image:db
-- Run container npm run start:db
+```sh
+npm run start:compose -- database
+npm run start:dev
+```
 
 After starting the app on port (4000 as default) you can open in your browser OpenAPI documentation by typing http://localhost:4000/api-docs/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
-
-## Testing
-
-After application running open new terminal and enter:
-
-To run all tests without authorization
-
-```sh
-npm run test
-```
-
-To run only one of all test suites
-
-```sh
-npm run test -- <path to suite>
-```
-
-To run all test with authorization
-
-```sh
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```sh
-npm run test:auth -- <path to suite>
-```
-
-### Auto-fix and format
 
 ```sh
 npm run lint
