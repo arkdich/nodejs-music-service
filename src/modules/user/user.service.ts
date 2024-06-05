@@ -10,7 +10,7 @@ export class UserService {
   private static instance: UserService | null = null;
 
   @InjectRepository(UserEntity)
-  private users: Repository<UserEntity>;
+  private usersRepository: Repository<UserEntity>;
 
   constructor() {
     if (UserService.instance) {
@@ -29,7 +29,7 @@ export class UserService {
       password: passwordHash,
     });
 
-    const user = await this.users
+    const user = await this.usersRepository
       .createQueryBuilder('insert_user')
       .insert()
       .into(UserEntity)
@@ -37,17 +37,17 @@ export class UserService {
       .returning('*')
       .execute();
 
-    return this.users.create(user.generatedMaps[0]);
+    return this.usersRepository.create(user.generatedMaps[0]);
   }
 
   async get(id: string) {
-    const user = await this.users.findOneBy({ id });
+    const user = await this.usersRepository.findOneBy({ id });
 
     return user;
   }
 
   async getAll() {
-    const users = await this.users.find();
+    const users = await this.usersRepository.find();
 
     return users;
   }
@@ -56,7 +56,7 @@ export class UserService {
     let result: DeleteResult | null = null;
 
     try {
-      result = await this.users.delete({ id });
+      result = await this.usersRepository.delete({ id });
     } catch (err) {
       throw new HttpException(
         'У пользователя остаются неудаленные записи',
@@ -69,11 +69,22 @@ export class UserService {
     }
   }
 
-  async update(id: string, password: UserEntity['password']) {
+  async updatePassword(id: string, password: UserEntity['password']) {
     const passwordHash = await generateHash(password);
 
-    await this.users.update({ id }, { password: passwordHash });
+    await this.usersRepository.update({ id }, { password: passwordHash });
 
     return passwordHash;
+  }
+
+  async activateUser(id: string) {
+    const result = await this.usersRepository.update(
+      { id },
+      { isActive: true },
+    );
+
+    if (result.affected === 0) {
+      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+    }
   }
 }

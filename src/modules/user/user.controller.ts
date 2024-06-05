@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -15,12 +16,17 @@ import { CreateUserDto, UpdatePasswordDto } from './model/user.dto';
 import { UserService } from './user.service';
 import { UserEntity } from './model/user.entity';
 import { AuthService } from '../auth/auth.service';
+import { PublicRoute } from 'src/shared/decorators/PublicRoute';
+import { getTemplateHtml } from 'src/shared/templates/get-template';
+import { JwtService } from '@nestjs/jwt';
+import { UserJwt } from '../auth/model/auth.type';
 
 @Controller('user')
 export class UserController {
   constructor(
     private userService: UserService,
     private authService: AuthService,
+    private jwtService: JwtService,
   ) {}
 
   @Get(':id')
@@ -49,7 +55,7 @@ export class UserController {
       return user;
     } catch (err) {
       throw new HttpException(
-        `${body.email} или ${body.login} уже существуют`,
+        `Пользователь с данными ${body.email} или ${body.login} уже существует`,
         HttpStatus.CONFLICT,
       );
     }
@@ -73,6 +79,36 @@ export class UserController {
   ) {
     await this.authService.validateUser({ id, password: oldPassword });
 
-    await this.userService.update(id, newPassword);
+    await this.userService.updatePassword(id, newPassword);
+  }
+
+  @PublicRoute()
+  @Get('activate/:token')
+  @HttpCode(HttpStatus.OK)
+  @Header('Content-Type', 'text/html')
+  async activateUser(@Param('token') token: string) {
+    let email = '';
+    let success = false;
+
+    try {
+      const user = await this.authService.validateRefreshToken(token);
+
+      await this.userService.activateUser(user.id);
+
+      email = user.email;
+      success = true;
+    } catch (err) {
+      const payload = this.jwtService.decode<UserJwt>(token);
+
+      email = payload.email;
+      success = false;
+    } finally {
+      const html = getTemplateHtml('AccountActivated', {
+        email,
+        success,
+      });
+
+      return html;
+    }
   }
 }

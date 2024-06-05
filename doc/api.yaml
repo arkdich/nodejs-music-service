@@ -444,6 +444,28 @@ paths:
         404:
           $ref: '#/components/responses/404'
 
+  /user/activate/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+          format: JWT
+
+    get:
+      tags:
+        - Users
+      summary: Activate user account
+      description: Activate user account via refresh token
+      responses:
+        200:
+          description: The user has been activated
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+
   /track:
     get:
       tags:

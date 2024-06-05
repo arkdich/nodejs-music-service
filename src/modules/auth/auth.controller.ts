@@ -44,9 +44,10 @@ export class AuthController {
       const tokens = await this.authService.generateTokens({
         id: user.id,
         login: user.login,
+        email: user.email,
       });
 
-      const activationLink = `${process.env.API_HOST}:${process.env.PORT_API}/auth/activate/${tokens.refreshToken}`;
+      const activationLink = `${process.env.API_HOST}:${process.env.PORT_API}/user/activate/${tokens.refreshToken}`;
 
       const html = getTemplateHtml('ActivateAccount', {
         link: activationLink,
@@ -64,15 +65,11 @@ export class AuthController {
       return tokens;
     } catch (err) {
       throw new HttpException(
-        `${data.email} или ${data.login} уже существуют`,
+        `Пользователь с данными ${data.email} или ${data.login} уже существует`,
         HttpStatus.CONFLICT,
       );
     }
   }
-
-  // @PublicRoute()
-  // @Patch('activate/:token')
-  // async activateUser() {}
 
   // @PublicRoute()
   // @Patch('password/reset')

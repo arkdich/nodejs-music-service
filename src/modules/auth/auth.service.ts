@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ChangePasswordDto, LoginDto } from './model/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +12,7 @@ import { compare } from 'bcrypt';
 import { Repository } from 'typeorm';
 import { config } from 'dotenv';
 import { UserService } from '../user/user.service';
+import { UserJwt } from './model/auth.type';
 
 config({ path: ['.env.local'] });
 
@@ -34,6 +40,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateTokens({
       id: user.id,
       login: user.login,
+      email: user.email,
     });
 
     return {
@@ -55,7 +62,7 @@ export class AuthService {
       throw new HttpException('Пароли не совпадают', HttpStatus.BAD_REQUEST);
     }
 
-    await this.userService.update(user.id, password);
+    await this.userService.updatePassword(user.id, password);
   }
 
   async getProfile(userId: string) {
@@ -93,10 +100,12 @@ export class AuthService {
   async generateTokens({
     id,
     login,
-  }: Partial<Pick<UserEntity, 'id' | 'login'>>) {
+    email,
+  }: Partial<Pick<UserEntity, 'id' | 'login' | 'email'>>) {
     const tokenPayload = {
       id,
       login,
+      email,
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload, {
@@ -110,5 +119,29 @@ export class AuthService {
     });
 
     return { accessToken, refreshToken };
+  }
+
+  async validateAccessToken(token: string) {
+    try {
+      const payload: UserJwt = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET_KEY,
+      });
+
+      return payload;
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  async validateRefreshToken(token: string) {
+    try {
+      const payload: UserJwt = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET_REFRESH_KEY,
+      });
+
+      return payload;
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
   }
 }
