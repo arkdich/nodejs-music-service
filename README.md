@@ -20,7 +20,8 @@ npm install
 
 ## Creating config file
 
-Create file .env.local in root directory and put environment variables in it, they wiil be used to configure application
+Create file `.env.local` in root directory and put environment variables in it, they wiil be used to configure application
+
 - POSTGRES_USER - username to access database
 - POSTGRES_PASSWORD
 - CRYPT_SALT=10 - salt used for password hashing
@@ -35,7 +36,7 @@ Create file .env.local in root directory and put environment variables in it, th
 npm run start:compose
 ```
 
-## Run database in container and application in dev mode
+## Running database in container and application in dev mode
 
 ```sh
 npm run start:compose -- database
@@ -45,16 +46,9 @@ npm run start:compose -- database
 npm run start:dev
 ```
 
-After starting the app on port (4000 as default) you can open in your browser OpenAPI documentation by typing http://localhost:4000/api-docs/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
+## Swagger docs
 
-```sh
-npm run lint
-```
-
-```sh
-npm run format
-```
+After starting the app on port (4000 as default) you can open in your browser Swagger documentation by typing http://localhost:4000/api-docs/. For more information about Swagger/OpenAPI please visit https://swagger.io/
 
 ### Debugging in VSCode
 
