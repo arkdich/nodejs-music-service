@@ -10,6 +10,8 @@ services:
       - .env.local
     ports:
       - '8000:5432'
+    volumes:
+      - ./pg-logs:/db/logs
     environment:
       - POSTGRES_INITDB_ARGS=-c shared_preload_libraries='pg_cron' -c cron.database_name='music_service'
   api:
