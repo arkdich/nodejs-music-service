@@ -1,6 +1,11 @@
 FROM postgres:alpine
 WORKDIR /db
 
+RUN apk add postgresql-pg_cron
+
+RUN cp /usr/lib/postgresql16/pg_cron.so /usr/local/lib/postgresql/
+RUN cp /usr/share/postgresql/extension/pg_cron* /usr/local/share/postgresql/extension/
+
 COPY ./src/database/sql /docker-entrypoint-initdb.d
 
 EXPOSE 5432
