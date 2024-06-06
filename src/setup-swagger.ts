@@ -5,7 +5,7 @@ import * as path from 'path';
 import { parse } from 'yaml';
 
 export const setupSwagger = (app: INestApplication) => {
-  const filePath = path.resolve(__dirname, '../doc/api.yaml');
+  const filePath = path.resolve(process.cwd(), 'doc/api.yaml');
 
   const apiYaml = readFileSync(filePath, 'utf8');
   const document = parse(apiYaml);
