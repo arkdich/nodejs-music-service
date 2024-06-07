@@ -4,7 +4,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ChangePasswordDto, LoginDto } from './model/auth.dto';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  PasswordResetDto,
+} from './model/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user/model/user.entity';
@@ -13,6 +17,10 @@ import { Repository } from 'typeorm';
 import { config } from 'dotenv';
 import { UserService } from '../user/user.service';
 import { UserJwt } from './model/auth.type';
+import { SendMailOptions } from 'nodemailer';
+import { MailService } from 'src/shared/servises/MailService';
+import { CreateUserDto } from '../user/model/user.dto';
+import { getTemplateHtml } from 'src/shared/templates/get-template';
 
 config({ path: ['.env.local'] });
 
@@ -26,6 +34,7 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private userService: UserService,
+    private mailService: MailService,
   ) {
     if (AuthService.instance) {
       return AuthService.instance;
@@ -49,6 +58,39 @@ export class AuthService {
     };
   }
 
+  async regisrer(data: CreateUserDto) {
+    try {
+      const user = await this.userService.add(data);
+      const tokens = await this.generateTokens({
+        id: user.id,
+        login: user.login,
+        email: user.email,
+      });
+
+      const activationLink = `${process.env.API_HOST}:${process.env.PORT_API}/user/activate/${tokens.refreshToken}`;
+
+      const html = getTemplateHtml('ActivateAccount', {
+        link: activationLink,
+      });
+
+      const mailOptions = {
+        from: process.env.SMTP_USER,
+        to: process.env.SMTP_USER,
+        subject: 'Активация аккаунта',
+        html,
+      };
+
+      this.mailService.sendMail(mailOptions);
+
+      return tokens;
+    } catch (err) {
+      throw new HttpException(
+        `Пользователь с данными ${data.email} или ${data.login} уже существует`,
+        HttpStatus.CONFLICT,
+      );
+    }
+  }
+
   async changePassword(
     userId: string,
     { currentPassword, password, passwordConfirm }: ChangePasswordDto,
@@ -65,10 +107,51 @@ export class AuthService {
     await this.userService.updatePassword(user.id, password);
   }
 
-  async getProfile(userId: string) {
-    const user = await this.userService.get(userId);
+  async generateResetLink(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
 
-    return user;
+    if (!user) {
+      throw new HttpException(
+        `Пользователь с email ${email} не найден`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const resetTokem = await this.jwtService.signAsync(
+      { sub: user.id, email: user.email },
+      { secret: process.env.JWT_SECRET_RESET_KEY },
+    );
+
+    const resetLink = `${process.env.API_HOST}:${process.env.PORT_API}/views/password-reset?token${resetTokem}`;
+
+    const mailOptions: SendMailOptions = {
+      from: process.env.SMTP_USER,
+      to: user.email,
+      subject: 'Сброс пароля',
+      html: `<p style="font-size:18px">Для сброса пароля перейдите по <a href=${resetLink}>ссылке</a></p>`,
+    };
+
+    await this.mailService.sendMail(mailOptions);
+  }
+
+  async resetPassword(data: PasswordResetDto) {
+    let sub = '';
+
+    try {
+      const payload = await this.jwtService.verifyAsync(data.token, {
+        secret: process.env.JWT_SECRET_RESET_KEY,
+      });
+
+      sub = payload.sub;
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
+
+    if (data.password !== data.passwordConfirm) {
+      throw new HttpException('Пароли не совпадают', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.userService.updatePassword(sub, data.password);
   }
 
   async validateUser({

@@ -3,20 +3,24 @@ import {
   Controller,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   Post,
+  Query,
+  ValidationPipe,
 } from '@nestjs/common';
-import { ChangePasswordDto, LoginDto } from './model/auth.dto';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  PasswordResetDto,
+  RequestPasswordResetDto,
+} from './model/auth.dto';
 import { AuthService } from './auth.service';
 import { PublicRoute } from 'src/shared/decorators/PublicRoute';
 import { Jwt } from 'src/shared/decorators/Jwt';
 import { UserJwt } from './model/auth.type';
-import { MailService } from 'src/shared/servises/MailService';
-import { getTemplateHtml } from 'src/shared/templates/get-template';
 import { CreateUserDto } from '../user/model/user.dto';
-import { UserService } from '../user/user.service';
 import { config } from 'dotenv';
+import { UserService } from '../user/user.service';
 
 config({ path: ['.env.local'] });
 
@@ -24,7 +28,6 @@ config({ path: ['.env.local'] });
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private mailService: MailService,
     private userService: UserService,
   ) {}
 
@@ -39,41 +42,22 @@ export class AuthController {
   @PublicRoute()
   @Post('register')
   async register(@Body() data: CreateUserDto) {
-    try {
-      const user = await this.userService.add(data);
-      const tokens = await this.authService.generateTokens({
-        id: user.id,
-        login: user.login,
-        email: user.email,
-      });
-
-      const activationLink = `${process.env.API_HOST}:${process.env.PORT_API}/user/activate/${tokens.refreshToken}`;
-
-      const html = getTemplateHtml('ActivateAccount', {
-        link: activationLink,
-      });
-
-      const mailOptions = {
-        from: process.env.SMTP_USER,
-        to: process.env.SMTP_USER,
-        subject: 'Активация аккаунта',
-        html,
-      };
-
-      this.mailService.sendMail(mailOptions);
-
-      return tokens;
-    } catch (err) {
-      throw new HttpException(
-        `Пользователь с данными ${data.email} или ${data.login} уже существует`,
-        HttpStatus.CONFLICT,
-      );
-    }
+    await this.authService.regisrer(data);
   }
 
-  // @PublicRoute()
-  // @Patch('password/reset')
-  // async resetPassword() {}
+  @PublicRoute()
+  @Get('password/reset')
+  @HttpCode(HttpStatus.OK)
+  async requestPasswordReset(@Query() { email }: RequestPasswordResetDto) {
+    await this.authService.generateResetLink(email);
+  }
+
+  @PublicRoute()
+  @Post('password/reset')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() data: PasswordResetDto) {
+    await this.authService.resetPassword(data);
+  }
 
   @Post('password/change')
   @HttpCode(HttpStatus.OK)
@@ -82,9 +66,9 @@ export class AuthController {
   }
 
   @Get('profile')
-  async getProfile(@Jwt() user: UserJwt) {
-    const profile = await this.authService.getProfile(user.id);
+  async getProfile(@Jwt() userJwt: UserJwt) {
+    const user = await this.userService.get(userJwt.id);
 
-    return profile;
+    return user;
   }
 }
