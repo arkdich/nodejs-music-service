@@ -27,6 +27,8 @@ Create file `.env.local` in root directory and put environment variables in it, 
 - CRYPT_SALT=10 - salt used for password hashing
 - JWT_SECRET_KEY - secret to generate access token
 - JWT_SECRET_REFRESH_KEY - secret to generate refresh token
+- JWT_SECRET_RESET_KEY= - secret to generate password reset token
+- JWT_REFRESH_TOKEN_EXPIRES_IN - max-age value for refresh token stored in http-only cookie in a format of ms (i.e. '30d')
 - SMTP_USER - account to send email from (IMAP must be configured)
 - SMTP_PASSWORD
 
