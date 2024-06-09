@@ -122,7 +122,7 @@ export class AuthService {
       { secret: process.env.JWT_SECRET_RESET_KEY },
     );
 
-    const resetLink = `${process.env.API_HOST}:${process.env.PORT_API}/views/password-reset?token${resetTokem}`;
+    const resetLink = `${process.env.API_HOST}:${process.env.PORT_API}/view/password-reset?token=${resetTokem}`;
 
     const mailOptions: SendMailOptions = {
       from: process.env.SMTP_USER,
@@ -220,6 +220,18 @@ export class AuthService {
     try {
       const payload: UserJwt = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET_REFRESH_KEY,
+      });
+
+      return payload;
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  async validateResetToken(token: string) {
+    try {
+      const payload: UserJwt = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_SECRET_RESET_KEY,
       });
 
       return payload;

@@ -7,6 +7,7 @@ import { FavoriteModule } from './modules/favorite/favorite.module';
 import { TypeOrmSettings } from './database/config.db';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthGuard } from './shared/guards/AuthGuard';
+import { ViewModule } from './view/view.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthGuard } from './shared/guards/AuthGuard';
     ArtistModule,
     AlbumModule,
     FavoriteModule,
+    ViewModule,
   ],
   providers: [{ provide: 'APP_GUARD', useClass: AuthGuard }],
 })

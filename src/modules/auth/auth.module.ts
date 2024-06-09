@@ -20,5 +20,6 @@ config({ path: ['.env.local'] });
   ],
   controllers: [AuthController],
   providers: [AuthService, MailService],
+  exports: [AuthService, MailService],
 })
 export class AuthModule {}
