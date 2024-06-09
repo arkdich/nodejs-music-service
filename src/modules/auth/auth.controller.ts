@@ -6,7 +6,6 @@ import {
   HttpStatus,
   Post,
   Query,
-  ValidationPipe,
 } from '@nestjs/common';
 import {
   ChangePasswordDto,
