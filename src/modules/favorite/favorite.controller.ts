@@ -19,7 +19,7 @@ export class FavoriteController {
 
   @Get()
   async get(@Jwt() user: UserJwt) {
-    const favorites = await this.favoriteService.get({ userId: user.id });
+    const favorites = await this.favoriteService.get({ userId: user.sub });
 
     return favorites;
   }
@@ -31,7 +31,7 @@ export class FavoriteController {
     @Jwt() user: UserJwt,
   ) {
     try {
-      await this.favoriteService.addTrack({ userId: user.id, trackId: id });
+      await this.favoriteService.addTrack({ userId: user.sub, trackId: id });
 
       return { message: `Track with id ${id} added to favorites` };
     } catch (err) {
@@ -46,7 +46,7 @@ export class FavoriteController {
     @Jwt() user: UserJwt,
   ) {
     try {
-      await this.favoriteService.deleteTrack({ userId: user.id, trackId: id });
+      await this.favoriteService.deleteTrack({ userId: user.sub, trackId: id });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     }
@@ -59,7 +59,7 @@ export class FavoriteController {
     @Jwt() user: UserJwt,
   ) {
     try {
-      await this.favoriteService.addAlbum({ userId: user.id, albumId: id });
+      await this.favoriteService.addAlbum({ userId: user.sub, albumId: id });
 
       return { message: `Album with id ${id} added to favorites` };
     } catch (err) {
@@ -74,7 +74,7 @@ export class FavoriteController {
     @Jwt() user: UserJwt,
   ) {
     try {
-      await this.favoriteService.deleteAlbum({ userId: user.id, albumId: id });
+      await this.favoriteService.deleteAlbum({ userId: user.sub, albumId: id });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.NOT_FOUND);
     }
@@ -87,7 +87,7 @@ export class FavoriteController {
     @Jwt() user: UserJwt,
   ) {
     try {
-      await this.favoriteService.addArtist({ userId: user.id, artistId: id });
+      await this.favoriteService.addArtist({ userId: user.sub, artistId: id });
 
       return { message: `Artist with id ${id} added to favorites` };
     } catch (err) {
@@ -103,7 +103,7 @@ export class FavoriteController {
   ) {
     try {
       await this.favoriteService.deleteArtist({
-        userId: user.id,
+        userId: user.sub,
         artistId: id,
       });
     } catch (err) {

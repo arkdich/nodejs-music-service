@@ -16,7 +16,7 @@ export class ViewService {
 
   async resetPassword(token: string) {
     try {
-      await this.authService.validateResetToken(token);
+      await this.authService.validateToken('reset', token);
 
       const html = getTemplateHtml('ResetPassword');
 

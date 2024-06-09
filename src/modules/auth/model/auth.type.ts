@@ -1,5 +1,5 @@
 export type UserJwt = {
-  id: string;
+  sub: string;
   login: string;
   email: string;
   iat: number;

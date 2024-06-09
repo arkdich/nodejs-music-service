@@ -186,7 +186,7 @@ export class AuthService {
     email,
   }: Partial<Pick<UserEntity, 'id' | 'login' | 'email'>>) {
     const tokenPayload = {
-      id,
+      sub: id,
       login,
       email,
     };
@@ -198,44 +198,26 @@ export class AuthService {
 
     const refreshToken = await this.jwtService.signAsync(tokenPayload, {
       secret: process.env.JWT_SECRET_REFRESH_KEY,
-      expiresIn: '30d',
+      expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN,
     });
 
     return { accessToken, refreshToken };
   }
 
-  async validateAccessToken(token: string) {
+  async validateToken(type: 'access' | 'refresh' | 'reset', token: string) {
+    const JWT_SECRETS = {
+      access: process.env.JWT_SECRET_KEY,
+      refresh: process.env.JWT_SECRET_REFRESH_KEY,
+      reset: process.env.JWT_SECRET_RESET_KEY,
+    };
+
     try {
       const payload: UserJwt = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET_KEY,
+        secret: JWT_SECRETS[type],
       });
 
       return payload;
-    } catch (err) {
-      throw new UnauthorizedException();
-    }
-  }
-
-  async validateRefreshToken(token: string) {
-    try {
-      const payload: UserJwt = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET_REFRESH_KEY,
-      });
-
-      return payload;
-    } catch (err) {
-      throw new UnauthorizedException();
-    }
-  }
-
-  async validateResetToken(token: string) {
-    try {
-      const payload: UserJwt = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET_RESET_KEY,
-      });
-
-      return payload;
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException();
     }
   }

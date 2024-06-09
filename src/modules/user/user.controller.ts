@@ -91,9 +91,9 @@ export class UserController {
     let success = false;
 
     try {
-      const user = await this.authService.validateRefreshToken(token);
+      const user = await this.authService.validateToken('refresh', token);
 
-      await this.userService.activateUser(user.id);
+      await this.userService.activateUser(user.sub);
 
       email = user.email;
       success = true;

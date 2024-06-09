@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
 import {
   ChangePasswordDto,
@@ -20,6 +21,8 @@ import { UserJwt } from './model/auth.type';
 import { CreateUserDto } from '../user/model/user.dto';
 import { config } from 'dotenv';
 import { UserService } from '../user/user.service';
+import { Response } from 'express';
+import ms from 'ms';
 
 config({ path: ['.env.local'] });
 
@@ -32,10 +35,19 @@ export class AuthController {
 
   @PublicRoute()
   @Post('login')
-  async login(@Body() data: LoginDto) {
-    const tokens = await this.authService.login(data);
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() data: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.login(data);
 
-    return tokens;
+    res.cookie('REFRESH_TOKEN', refreshToken, {
+      maxAge: ms(process.env.JWT_REFRESH_TOKEN_EXPIRES_IN),
+      httpOnly: true,
+    });
+
+    return { accessToken };
   }
 
   @PublicRoute()
@@ -61,12 +73,12 @@ export class AuthController {
   @Post('password/change')
   @HttpCode(HttpStatus.OK)
   async changePassword(@Body() data: ChangePasswordDto, @Jwt() user: UserJwt) {
-    await this.authService.changePassword(user.id, data);
+    await this.authService.changePassword(user.sub, data);
   }
 
   @Get('profile')
   async getProfile(@Jwt() userJwt: UserJwt) {
-    const user = await this.userService.get(userJwt.id);
+    const user = await this.userService.get(userJwt.sub);
 
     return user;
   }

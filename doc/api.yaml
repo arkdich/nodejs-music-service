@@ -196,9 +196,12 @@ paths:
                 properties:
                   accessToken:
                     type: string
-                  refreshToken:
-                    type: string
-                description: JWT Tokens
+                description: JWT Token
+          headers:
+            Set-Cookie:
+              description: REFRESH_TOKEN
+              schema:
+                type: string
         401:
           description: Incorrect login or password
 

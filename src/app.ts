@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import 'reflect-metadata';
 import { setupSwagger } from './setup-swagger';
+import cookieParser from 'cookie-parser';
 
 export const PORT_API = Number(process.env.PORT_API);
 
@@ -14,6 +15,7 @@ const bootstrap = async () => {
   const pipes = [new ValidationPipe()];
   const interceptors = [new ClassSerializerInterceptor(appReflector)];
 
+  app.use(cookieParser());
   app.useGlobalPipes(...pipes);
   app.useGlobalInterceptors(...interceptors);
 
