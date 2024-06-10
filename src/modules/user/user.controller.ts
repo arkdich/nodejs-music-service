@@ -15,11 +15,11 @@ import {
 import { CreateUserDto, UpdatePasswordDto } from './model/user.dto';
 import { UserService } from './user.service';
 import { UserEntity } from './model/user.entity';
-import { AuthService } from '../auth/auth.service';
 import { PublicRoute } from 'src/shared/decorators/PublicRoute';
 import { getTemplateHtml } from 'src/shared/templates/get-template';
 import { JwtService } from '@nestjs/jwt';
-import { UserJwt } from '../auth/model/auth.type';
+import { UserJwt } from '../../shared/model/types/auth.type';
+import { AuthService } from 'src/shared/servises/auth-service/auth.service';
 
 @Controller('user')
 export class UserController {

@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: dockerfile.db
       tags:
-        - 'music-service-db-image'
+        - 'arkdich/music-service-db'
     container_name: music-service-db-container
     env_file:
       - .env.local
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: dockerfile.api
       tags:
-        - 'music-service-api-image'
+        - 'arkdich/music-service-api'
     depends_on:
       - database
     container_name: music-service-api-container

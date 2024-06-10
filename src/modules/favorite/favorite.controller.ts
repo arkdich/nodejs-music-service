@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { Jwt } from 'src/shared/decorators/Jwt';
-import { UserJwt } from '../auth/model/auth.type';
+import { UserJwt } from '../../shared/model/types/auth.type';
 
 @Controller('favs')
 export class FavoriteController {
