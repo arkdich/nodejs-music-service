@@ -31,3 +31,6 @@ services:
       - DB_HOST=database
     ports:
       - '4000:4000'
+networks:
+  music-service:
+    name: music-service-network

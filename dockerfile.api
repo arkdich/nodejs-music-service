@@ -1,11 +1,23 @@
-FROM node:20-alpine
+FROM node:20-alpine as build
 WORKDIR /app
-COPY . .
 
-ENV NODE_ENV=development
-
+COPY ./package*json .
 RUN npm install
 
-EXPOSE 4000
+COPY . .
 
-CMD ["npm", "start"]
+RUN npm run build
+RUN npm prune --omit=dev
+
+FROM node:20-alpine
+WORKDIR /app
+
+COPY --from=build ./dist ./dist
+COPY --from=build ./doc ./doc
+COPY --from=build ./node_modules ./node_modules
+COPY --from=build ./.env .
+COPY --from=build ./package.json .
+
+CMD npm run start:prod
+
+EXPOSE 4000
