@@ -1,5 +1,7 @@
 # Music Service
 
+The project consist of three parts: this repository that serves as main api, [auth service](https://github.com/arkdich/nodejs-auth-service) and [nginx gateway](https://github.com/arkdich/music-service-gateway)
+
 ## Prerequisites
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
